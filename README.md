@@ -2,7 +2,7 @@
 This randomizer changes the way The 7th Saga is played in numerous ways.  It also finds ways to speed up the game to prevent massive amounts of grinding that this game is notorious for.
 
 # Optional changes the way the game is played
-
+- Added Quality of Life + Balance Template and Button
 - Randomize monster zones (meaning you can run into something completely different at a location)
 - Randomize monster patterns (Hermits casting Vacuum2, anyone?!)
 - Randomize hero spells (anybody has the chance to learn Elixer now)
