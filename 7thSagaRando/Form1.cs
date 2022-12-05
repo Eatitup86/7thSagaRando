@@ -3793,5 +3793,112 @@ namespace _7thSagaRando
                 }
             }
         }
+        // Function to only apply Balance + Quality of Life hacks.
+        private void QoLBAL()
+        {
+            loadRom();
+            Random r1 = new Random(Convert.ToInt32(txtSeed.Text));
+
+            // Adjust Requirements if not 100% (Note: this will randomize if options are not properly set)
+            adjustExperienceTable(r1);
+            goldRequirements(r1);
+            // Adjust Seed Range
+            seedAdjustment(r1);
+            // Adjust Apprentice Join / Battle rates.
+            heroInteractions(r1);
+            // Double walk speed (Graphical Glitches)
+            if (chkDoubleWalk.Checked) doubleWalk();
+            // Remove need to speak with elder to retrieve Digger, etc...
+            if (chkRemoveTriggers.Checked) removeUselessTriggers();
+            // Remove XP Split for party member.
+            if (chkFullXP.Checked) noXPSplitting();
+            // Alter Monster Radar Speed
+            monsterMovement();
+            // Speeds up Title Screen + Shop Dialogue.
+            if (chkSpeedHacks.Checked) speedHacks();
+            // Remove stat gain text on level up.
+            if (!chkShowStatGains.Checked) romData[0x18cd1] = 0x6b;
+            // Speedup airship ride (QoL)
+            if (chkBrushAirship1.Checked)
+            {
+                romData[0x39a5] = 0x60;
+                romData[0x39a6] = 0x07;
+                for (int lnI = 0x500e8; lnI <= 0x50228; lnI += 8)
+                    romData[lnI] = 0x01;
+                romData[0x39a5] = 0xb0;
+                romData[0x39a6] = 0x00;
+            }
+            // Elnard Balance Fixes
+            // +1 Possible Stat Cap per 10 lvls (Lvl 10: 2-3, Lvl 20: 3-4, etc...)
+            if (chkElnardStats.Checked)
+            {
+                // Enforce stat boosts when hero level > 10
+                byte[] romPlugin = { 0x22, 0xd0, 0xf6, 0xc2 };
+                for (int lnI = 0; lnI < romPlugin.Length; lnI++)
+                {
+                    romData[0x27872 + lnI] = romPlugin[lnI];
+                    romData[0x278ad + lnI] = romPlugin[lnI];
+                    romData[0x278e8 + lnI] = romPlugin[lnI];
+                    romData[0x27923 + lnI] = romPlugin[lnI];
+                    romData[0x2795e + lnI] = romPlugin[lnI];
+                    romData[0x2799e + lnI] = romPlugin[lnI];
+                }
+
+                romPlugin = new byte[] { 0xa0, 0x02, 0x00,
+                0x22, 0x5b, 0xbd, 0xc0,
+                0x6b };
+
+                for (int lnI = 0; lnI < romPlugin.Length; lnI++)
+                    romData[0x2f6d0 + lnI] = romPlugin[lnI];
+            }
+            else
+            {
+                // If no +1 Possible Stat Cap per 10 lvls then remove improper scaling from Apprentice battle.
+                romData[0xbd61] = 0x7f; // Prevent stat boosts when hero level > 10.  That's cheating.
+            }
+            // Force apprentice to be equal to your level instead of plus 1.
+            romData[0xca59] = romData[0xca5a] = 0xea;
+            // Remove Apprentice's Double MP
+            romData[0x24852] = 0xea;
+            // Randomize Patrof apprentice to be current level +1-5.
+            romData[0xc020] = (byte)(1 + r1.Next() % 5);
+
+            // Enable debuffs and vacuums on bosses by replacing BEQ with BRA
+            if (chkDebuffBoss.Checked)
+            {
+                romData[0x4bf6a] = 0x80;
+                // But make sure that Doros, Gorsia, and Gariso are immune to debuffs (the game does weird stuff otherwise)
+                romData[0x7951] = romData[0x79bd] = 0x64;
+                romData[0x79a5] = romData[0x7bc7] = romData[0x7bf1] = romData[0x7c1b] = 0x64;
+                romData[0x78a9] = romData[0x7b73] = 0x64;
+            }
+            if (chkVacuumBoss.Checked)
+            {
+                romData[0x4be60] = 0x80;
+                // But make sure that Doros, Gorsia, and Gariso are immune to vacuum (the game does weird stuff otherwise)
+                romData[0x7950] = romData[0x79bc] = 0x64;
+                romData[0x79a4] = romData[0x7bc6] = romData[0x7bf0] = romData[0x7c1a] = 0x64;
+                romData[0x78a8] = romData[0x7b72] = 0x64;
+            }
+        }
+
+        // Apply Bal+QoL Button Press
+        private void button4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                QoLBAL();
+                saveRom();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error:  " + ex.Message);
+            }
+        }
+        // Set Default Bal+QoL Values
+        private void button5_Click(object sender, EventArgs e)
+        {
+            txtFlags.Text = "0PU0000000OH0555000000000013";
+        }
     }
 }
